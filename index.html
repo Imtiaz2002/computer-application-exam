@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Computer Application - Online MCQ Exam</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,"Noto Sans Bengali",sans-serif;background:radial-gradient(circle at 10% 0%,#e0e7ff 0,transparent 30%),linear-gradient(180deg,#f5f7ff 0%,#f8fafc 45%,#eef2f7 100%);color:#172033;min-height:100vh}
+header{background:linear-gradient(135deg,#1e1b4b,#4338ca 55%,#7c3aed);color:white;padding:34px 16px 30px;text-align:center;box-shadow:0 12px 35px #312e8140;position:relative;overflow:hidden}header:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:#ffffff12;right:-60px;top:-80px}
+header h1{margin:0 0 8px;font-size:26px;letter-spacing:.2px} header p{margin:0;opacity:.92;font-size:14px}
+.container{max-width:980px;margin:24px auto;padding:0 14px}.tabs{background:#ffffffb8;padding:6px;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 5px 20px #0000000d}.tabs .btn{box-shadow:none}
+.card{background:rgba(255,255,255,.97);border:1px solid #e6e9f2;border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 10px 30px #1e293b12;position:relative}.card h2{margin-top:0;color:#1e1b4b}
+input{width:100%;padding:14px;border:1px solid #d6dbe6;border-radius:12px;font-size:16px;margin-top:7px;outline:none;background:#fbfcff}input:focus{border-color:#6366f1;box-shadow:0 0 0 4px #6366f11a}
+.btn{border:0;border-radius:12px;padding:13px 19px;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 5px 14px #00000012}.btn:hover{transform:translateY(-1px)}
+.primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white}.danger{background:linear-gradient(135deg,#dc2626,#ef4444);color:white}.danger:hover{box-shadow:0 7px 18px #dc262640}.gray{background:#eef0f5;color:#111827}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);padding:12px 14px;box-shadow:0 4px 18px #00000012;display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid #e5e7eb}
+.timer{font-weight:900;color:#dc2626;font-size:19px;background:#fff1f2;padding:8px 12px;border-radius:12px}
+.progress{height:10px;background:#e8eaf1;border-radius:20px;overflow:hidden;margin-top:10px}
+.progress>div{height:100%;background:linear-gradient(90deg,#4f46e5,#8b5cf6);width:0;transition:.25s}
+.qtitle{font-weight:800;font-size:17px;line-height:1.55;margin-bottom:14px;color:#1f2937}.qtitle:first-letter{color:#4f46e5}
+.option{display:flex;align-items:flex-start;gap:4px;border:1px solid #e1e5ee;border-radius:14px;padding:14px;margin:9px 0;cursor:pointer;background:#fff;transition:.18s}.option input{accent-color:#4f46e5;margin-top:3px}.option:hover{transform:translateX(2px);box-shadow:0 5px 14px #4f46e512}.option:hover{border-color:#a5b4fc;background:#fafaff}
+.option:has(input:checked){border-color:#4f46e5;background:#eef2ff}
+.option input{width:auto;margin:0 8px 0 0}
+.hidden{display:none!important}
+.result-score{font-size:48px;font-weight:900;text-align:center;color:#4f46e5;margin:10px 0}
+.small{font-size:13px;color:#667085}
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}
+th{background:#f8fafc}
+.correct{color:#15803d;font-weight:700}.wrong{color:#dc2626;font-weight:700}
+.answerBox{background:#f8fafc;border-radius:10px;padding:12px;margin:8px 0}
+.tabs{display:flex;gap:10px;margin-bottom:16px}.tabs button{flex:1}
+@media(max-width:600px){header{padding:26px 12px 24px}header h1{font-size:20px}.container{padding:0 10px}.card{padding:14px;border-radius:16px}.qtitle{font-size:16px}.tabs{gap:5px}.tabs .btn{padding:11px 8px;font-size:14px}.topbar{padding:10px}.timer{font-size:17px;padding:7px 9px}.option{padding:12px;font-size:15px}.result-score{font-size:42px}}
+.brand{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;font-weight:700;opacity:.9}
+.palette{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:14px}.palette button{border:1px solid #d8dce8;background:#fff;border-radius:8px;padding:7px 3px;font-weight:800;cursor:pointer}.palette button.answered{background:#dcfce7;border-color:#86efac;color:#166534}.palette button.current{outline:2px solid #6366f1}.dashTools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.dashTools input{flex:1;min-width:180px;margin:0}.statsGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.stat{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:12px}.stat b{font-size:22px}@media(max-width:600px){.palette{grid-template-columns:repeat(8,1fr)}.statsGrid{grid-template-columns:repeat(2,1fr)}}
+.exam-watermark{position:fixed;inset:0;z-index:5;pointer-events:none;display:flex;align-items:center;justify-content:center;transform:rotate(-25deg);font-size:24px;font-weight:800;letter-spacing:2px;color:#000;opacity:.055;white-space:nowrap;user-select:none}
+</style>
+</head>
+<body>
+<header>
+<h1>Computer Application — Online MCQ Exam</h1>
+<p>40 Marks • 40 Questions • 1 Hour</p><div class="brand">✦ Online Examination Portal</div>
+</header>
+
+<div class="container">
+<div class="tabs" style="max-width:420px;margin-left:auto;margin-right:auto">
+<button class="btn primary" onclick="document.getElementById('studentSection').classList.remove('hidden')">Student Exam</button>
+</div>
+
+<section id="studentSection">
+<div id="studentInfo" class="card">
+<div style="font-size:12px;font-weight:800;color:#4f46e5;letter-spacing:.5px">WELCOME 👋</div><h2>Start Your Exam</h2>
+<label>Student Name
+<input id="studentName" placeholder="Enter your name">
+</label><br>
+<button class="btn primary" onclick="startExam()">Start Exam</button>
+<p class="small">Exam শুরু করার পর 60 মিনিটের timer চলবে। সময় শেষ হলে exam automatically submit হবে।</p>
+</div>
+
+
+<section id="liveMonitorPreview" style="display:none;margin:16px 0;padding:14px;border:1px solid #ddd;border-radius:14px;background:#fff;">
+  <div style="font-weight:700;margin-bottom:8px">Live Exam Status</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;font-size:14px">
+    <div>Question: <b id="liveCurrentQuestion">—</b></div>
+    <div>Answered: <b id="liveAnswered">0</b></div>
+    <div>Remaining: <b id="liveRemaining">40</b></div>
+    <div>Violations: <b id="liveViolations">0</b></div>
+    <div>Status: <b id="liveStatus">Running</b></div>
+  </div>
+</section>
+
+<div id="examSection" class="hidden">
+<div id="examWatermark" class="exam-watermark"></div>
+<div class="topbar">
+<div><b id="studentDisplay"></b></div>
+
+<div id="activityTimeline" style="display:none"></div>
+<div class="timer">⏱ <span id="timer">60:00</span></div>
+</div>
+<div class="card">
+<div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><b>Exam Progress</b><b><span id="answeredCount">0</span>/40</b></div>
+<div id="questionPalette" class="palette"></div>
+<div class="progress"><div id="progressBar"></div></div>
+</div>
+<div id="questions"></div>
+<div class="card" style="text-align:center"><p class="small">সব উত্তর দেওয়ার পর Submit Exam চাপুন</p><button class="btn danger" onclick="submitExam(false)" style="min-width:190px">✓ Submit Exam</button></div>
+</div>
+
+<div id="resultSection" class="hidden"></div>
+</section>
+
+</div>
+
+<div style="text-align:center;margin:10px 0 18px">
+  <a href="teacher.html" style="color:#4338ca;font-weight:700;text-decoration:none">
+    👨‍🏫 Teacher Login
+  </a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getDatabase, ref, push, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBtlw1TCcjUah1JAlrVc7XaH53p8DT4PR8",
+  authDomain: "exam-8fde7.firebaseapp.com",
+  projectId: "exam-8fde7",
+  storageBucket: "exam-8fde7.firebasestorage.app",
+  messagingSenderId: "703193735071",
+  appId: "1:703193735071:web:abb365641075143fb3a7aa",
+  measurementId: "G-E1HVQRWQRE",
+  databaseURL: "https://exam-8fde7-default-rtdb.firebaseio.com"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+let authReady = false;
+onAuthStateChanged(auth, user => { authReady = !!user; window.__studentAuthUser = user || null; });
+async function ensureStudentAuth(){
+  if(auth.currentUser) return auth.currentUser;
+  const cred = await signInAnonymously(auth);
+  return cred.user;
+}
+
+const questions = [
+["নিচের কোনটি Multi User Operating System-এর উদাহরণ?",["MS-DOS","UNIX","MS-Word","PowerPoint"],1],
+["(110101)₂ এর Decimal মান কত?",["51","52","53","54"],2],
+["Software প্রধানত কত প্রকার?",["2","3","4","5"],0],
+["Dynamic RAM-এর ক্ষেত্রে Data ধরে রাখার জন্য কোন বিষয়টি গুরুত্বপূর্ণ?",["নিয়মিত Refresh","Printing","Scanning","Formatting"],0],
+["Compiler-এর প্রধান কাজ কোনটি?",["Program-এর ভুল নিজে থেকে মুছে ফেলা","Source Code-কে Machine-understandable Code-এ রূপান্তর করা","Computer-এর Hardware নিয়ন্ত্রণ করা","Program-এর Output Print করা"],1],
+["8 Bit সমান কত Byte?",["1 Byte","8 Byte","1024 Byte","1 Kilobyte"],0],
+["GUI-এর পূর্ণরূপ কী?",["General User Interface","Graphical User Interface","Graphic Utility Interface","General Utility Input"],1],
+["(35.2)₈ এর Decimal মান কত?",["28.25","29.25","29.5","30.25"],1],
+["File/Directory Move করতে কোন Command ব্যবহার করা হয়?",["cp","mv","movefile","shift"],1],
+["Encapsulation কোনটির বৈশিষ্ট্য?",["OOP","Machine Language","Assembly Language","HTML"],0],
+["DVD-এর সম্পূর্ণ নাম কী?",["Digital Version Disk","Digital Versatile Disc","Data Versatile Disk","Digital Video Drive"],1],
+["Compiler ও Interpreter-এর মধ্যে প্রধান পার্থক্য কোনটি?",["Compiler শুধু Assembly Language নিয়ে কাজ করে","Interpreter সম্পূর্ণ Program একসঙ্গে Execute করে","Compiler সাধারণত সম্পূর্ণ Program একসঙ্গে অনুবাদ করে","দুটির মধ্যে কোনো পার্থক্য নেই"],2],
+["কোনো নির্দিষ্ট কাজ সম্পাদনের জন্য পরপর নির্দেশের সমষ্টিকে কী বলা হয়?",["Algorithm","Program","Compiler","Programming Language"],1],
+["(56)₈ এর Binary মান কোনটি?",["(101110)₂","(101101)₂","(110110)₂","(100110)₂"],0],
+["Application Software-এর সঠিক উদাহরণ কোনটি?",["Compiler","Loader","MS-Excel","Operating System"],2],
+["Time Sharing-এ CPU-এর নির্দিষ্ট সময়ের ছোট অংশকে কী বলে?",["Time Unit","Time Slice","Time Block","Time File"],1],
+["(B4.8)₁₆ এর Decimal মান কত?",["179.5","180.25","180.5","181.5"],2],
+["Assembly Language-কে Machine Language-এ কে রূপান্তর করে?",["Compiler","Interpreter","Assembler","Loader"],2],
+["একটি Digital Computer-এ তথ্যের ক্ষুদ্রতম একক কোনটি?",["Byte","Bit","Kilobyte","Megabyte"],1],
+["High Level Language-এর প্রধান বৈশিষ্ট্য কোনটি?",["শুধুমাত্র 0 ও 1 ব্যবহার করে","Computer-এর Machine Code সরাসরি ব্যবহার করে","মানুষের বোঝার উপযোগী English words ও mathematical symbols ব্যবহার করে","শুধুমাত্র Hexadecimal code ব্যবহার করে"],2],
+["Hidden File সহ সব File দেখতে কোন Command ব্যবহার করা হয়?",["ls -a","ls -h","ls -x","ls -p"],0],
+["একটি কম্পিউটারে Input Unit থেকে নির্দেশ পাওয়ার পর প্রয়োজনীয় তথ্য Memory-তে সংরক্ষিত হলো। এরপর সেই তথ্য ALU-তে পাঠিয়ে Processing করা হলো। এই পুরো প্রক্রিয়াটি পরিচালনার মূল দায়িত্ব কার?",["ALU","Control Unit","RAM","Output Unit"],1],
+["(154.4)₈ এর Hexadecimal মান কোনটি?",["(6C.8)₁₆","(6A.8)₁₆","(6C.4)₁₆","(5C.8)₁₆"],0],
+["Operating System কোন ধরনের Software?",["Application Software","System Software","Utility Hardware","Programming Hardware"],1],
+["কোন Printer-এ কালির শেয়ার/প্রিন্টিংয়ের জন্য Ink ব্যবহার করা হয়?",["Laser Printer","Dot Matrix Printer","Inkjet Printer","Thermal Printer"],2],
+["Programming Language-কে সাধারণভাবে কয়টি প্রধান ভাগে ভাগ করা যায়?",["2","3","5","6"],1],
+["নিচের কোন বক্তব্যটি Cache Memory সম্পর্কে সঠিক?",["এটি প্রধানত দীর্ঘমেয়াদে তথ্য সংরক্ষণ করে","এটি CPU ও RAM-এর মধ্যে দ্রুত তথ্য আদান-প্রদানে সাহায্য করে","এটি একটি Optical Storage Device","বিদ্যুৎ চলে গেলেও এতে তথ্য স্থায়ী থাকে"],1],
+["(58)₁₀ এর Binary মান কোনটি?",["(111010)₂","(111001)₂","(110110)₂","(101110)₂"],0],
+["Terminal Screen পরিষ্কার করতে কোন Command ব্যবহার করা হয়?",["clean","clear","cls","screen"],1],
+["Programming Language-এর Generation অনুযায়ী সঠিক ক্রম কোনটি?",["Assembly → Machine → High Level","Machine → Assembly → High Level","High Level → Machine → Assembly","Machine → High Level → Assembly"],1],
+["LCD Monitor-এর প্রধান উপাদান কোনটি?",["Cathode Ray Tube","HDMI Cable","Liquid Crystal Molecule","Magnetic Tape"],2],
+["1 Kilobyte = 1024 Byte হলে, 1 Megabyte-এর সমান কত Kilobyte?",["100","512","1024","2048"],2],
+["DTP (Desktop Publishing)-এর ক্ষেত্রে নিচের কোন Device-টি মূলত Pointing/Selection-এর জন্য বেশি উপযোগী?",["Mechanical Mouse","Optical Mouse","Microphone","Scanner"],1],
+["নিচের কোন ক্রমটি কম্পিউটারের Memory-এর শ্রেণিবিভাগকে সঠিকভাবে প্রকাশ করে?",["Primary → Secondary → Cache → Flash","Primary → Secondary → Cache → RAM","Memory → Primary Memory → Secondary Memory → Cache Memory","Secondary → Primary → RAM → ROM"],2],
+["Object Module-কে Memory-তে Load করে কোনটি?",["Linker","Loader","Compiler","Interpreter"],1],
+["Assertion (A): Control Unit ALU এবং Input/Output Device-এর সঙ্গে সমন্বয় করে কাজ করে। Reason (R): Control Unit বিভিন্ন নির্দেশ গ্রহণ করে এবং সেই অনুযায়ী কম্পিউটারের অন্যান্য অংশকে নিয়ন্ত্রণ করে।",["A ও R উভয়ই সত্য এবং R হলো A-এর সঠিক ব্যাখ্যা","A ও R উভয়ই সত্য কিন্তু R, A-এর সঠিক ব্যাখ্যা নয়","A সত্য কিন্তু R মিথ্যা","A মিথ্যা কিন্তু R সত্য"],0],
+["কম্পিউটারের Processing Speed দ্রুত করার জন্য কোন Memory ব্যবহৃত হয়?",["Virtual Memory","Flash Memory","Cache Memory","UVPROM"],2],
+["(101110.101)₂ এর Octal মান কোনটি?",["(56.5)₈","(55.5)₈","(56.4)₈","(57.5)₈"],0],
+["CUI-তে প্রধানত কী ব্যবহার করা হয়?",["Icon","Command","Picture","Window"],1],
+["Compiler ও Interpreter-এর মধ্যে সঠিক পার্থক্য কোনটি?",["Compiler Statement-by-Statement এবং Interpreter সম্পূর্ণ Program অনুবাদ করে","Compiler সম্পূর্ণ Program একসঙ্গে অনুবাদ করে এবং Interpreter Statement-by-Statement অনুবাদ করে","উভয়েই শুধুমাত্র Assembly Language অনুবাদ করে","Interpreter Object Module-কে Memory-তে Load করে"],1]
+];
+
+let studentName="", timerSeconds=3600, timerInterval=null, submitted=false, currentSet="", examQuestions=[], answerChanges=0, currentResults=[], securityLog=[];
+
+// Four fixed layouts: same 40 questions, but question and option order changes by set.
+const SETS=["A","B","C","D"];
+
+function seededShuffle(arr, seed){
+  const a=[...arr];
+  let x=seed>>>0;
+  for(let i=a.length-1;i>0;i--){
+    x=(1664525*x+1013904223)>>>0;
+    const j=x%(i+1);
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function makeSet(setIndex){
+  const qSeeds=[0x13579BDF,0x2468ACE1,0x9E3779B9,0x7F4A7C15];
+  const oSeeds=[0xA1B2C3D4,0xC3D4E5F6,0x1F2E3D4C,0x55667788];
+
+  const ordered=seededShuffle(
+    questions.map((q,i)=>({q,i})),
+    qSeeds[setIndex]
+  );
+
+  return ordered.map(({q,i})=>{
+    const options=seededShuffle(
+      q[1].map((text,optIndex)=>({text,idx:optIndex})),
+      (oSeeds[setIndex] ^ Math.imul(i+1,0x45D9F3B))>>>0
+    );
+    return {
+      question:q[0],
+      options:options,
+      originalIndex:i,
+      originalCorrect:q[2]
+    };
+  });
+}
+
+function getRandomSet(){
+  return Math.floor(Math.random()*4);
+}
+
+function esc(s){
+ return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+function renderQuestions(){
+ const box=document.getElementById("questions");
+ box.innerHTML="";
+ examQuestions.forEach((q,i)=>{
+   const card=document.createElement("div");
+   card.className="card";
+   card.id="qcard"+i;
+   let opts="";
+   q.options.forEach((o,j)=>{
+     opts += `<label class="option"><input type="radio" name="q${i}" value="${o.idx}"> <b>${String.fromCharCode(65+j)})</b> ${esc(o.text)}</label>`;
+   });
+   card.innerHTML=`<div class="qtitle">${i+1}. ${esc(q.question)}</div>${opts}`;
+   box.appendChild(card);
+ });
+ document.querySelectorAll('#questions input[type=radio]').forEach(x=>x.addEventListener("change",()=>{answerChanges++;updateProgress();renderPalette();}));
+ renderPalette();
+}
+
+function renderPalette(){
+ const p=document.getElementById("questionPalette"); if(!p)return;
+ p.innerHTML=examQuestions.map((_,i)=>{
+   const checked=document.querySelector(`input[name="q${i}"]:checked`);
+   return `<button class="${checked?'answered':''}" onclick="document.getElementById('qcard${i}')?.scrollIntoView({behavior:'smooth',block:'start'})">${i+1}</button>`;
+ }).join('');
+}
+
+function updateProgress(){
+ const n=document.querySelectorAll('input[type=radio]:checked').length;
+ document.getElementById("answeredCount").textContent=n;
+ document.getElementById("progressBar").style.width=(n/40*100)+"%";
+}
+
+window.startExam=async function(){
+ try{ await ensureStudentAuth(); }catch(e){ alert("Secure connection could not be established. Please try again.\n\n"+e.message); return; }
+ studentName=document.getElementById("studentName").value.trim();
+ if(!studentName){alert("Please enter your name.");return;}
+ const setIndex=getRandomSet();
+ currentSet=SETS[setIndex];
+ examQuestions=makeSet(setIndex);
+ submitted=false;
+ answerChanges=0; securityViolations=0; securityLocked=false;
+ document.getElementById("studentInfo").classList.add("hidden");
+ document.getElementById("examSection").classList.remove("hidden");
+ document.getElementById("studentDisplay").textContent=studentName+" • Set "+currentSet;
+ renderQuestions();
+ timerSeconds=3600;
+ updateTimer();
+ clearInterval(timerInterval);
+ timerInterval=setInterval(()=>{
+   timerSeconds--;
+   updateTimer();
+   if(timerSeconds<=0){clearInterval(timerInterval);submitExam(true);}
+ },1000);
+ window.scrollTo({top:0,behavior:"smooth"});
+};
+
+function updateTimer(){
+ const m=Math.floor(timerSeconds/60).toString().padStart(2,"0");
+ const s=(timerSeconds%60).toString().padStart(2,"0");
+ document.getElementById("timer").textContent=m+":"+s;
+}
+
+window.submitExam=async function(autoSubmit){
+ if(submitted)return;
+ if(!autoSubmit && !confirm("Exam submit করবেন?"))return;
+ submitted=true;
+ clearInterval(timerInterval);
+ const selected=examQuestions.map((q,i)=>{
+   const el=document.querySelector(`input[name="q${i}"]:checked`);
+   return el ? Number(el.value) : null;
+ });
+ const score=selected.reduce((sum,v,i)=>sum+(v===examQuestions[i].originalCorrect?1:0),0);
+ const correct=selected.filter((v,i)=>v!==null && v===examQuestions[i].originalCorrect).length;
+ const wrong=selected.filter((v,i)=>v!==null && v!==examQuestions[i].originalCorrect).length;
+ const unanswered=selected.filter(v=>v===null).length;
+ const answers=selected.map((v,i)=>{
+   const q=examQuestions[i];
+   const selectedOptionIndex=q.options.findIndex(o=>o.idx===v);
+   const correctOptionIndex=q.options.findIndex(o=>o.idx===q.originalCorrect);
+   return {
+     questionNo:i+1, originalQuestionNo:q.originalIndex+1,
+     selected:v===null?null:String.fromCharCode(65+selectedOptionIndex),
+     selectedText:v===null?null:q.options[selectedOptionIndex]?.text,
+     correct:String.fromCharCode(65+correctOptionIndex),
+     correctText:q.options[correctOptionIndex]?.text
+   };
+ });
+ const record={
+   name:studentName,
+   set:currentSet,
+   score:score,
+   total:40,
+   correct:correct,
+   wrong:wrong,
+   unanswered:unanswered,
+   submittedAt:new Date().toISOString(),
+   autoSubmitted:autoSubmit,
+   uid: auth.currentUser ? auth.currentUser.uid : null,
+   securityViolations:securityViolations,
+   answerChanges:answerChanges,
+   answers:answers
+ };
+ try{
+   await push(ref(db,"computerApplicationExam/results"),record);
+   document.getElementById("examSection").classList.add("hidden");
+   releaseExamLock();
+   clearTimeout(hardTimer);
+   showResult(record);
+ }catch(err){
+   submitted=false;
+   alert("Result Firebase-এ save হয়নি। Database Rules/Internet check করুন।\\n\\n"+err.message);
+ }
+};
+
+function showResult(r){
+ const rs=document.getElementById("resultSection");
+ rs.classList.remove("hidden");
+ rs.innerHTML=`<div class="card">
+ <h2 style="text-align:center">Exam Submitted Successfully ✅</h2>
+ <div class="result-score">${r.score}/40</div>
+ <p style="text-align:center"><b>${esc(r.name)}</b> • <b>Set ${esc(r.set||"-")}</b></p>
+ <hr>
+ <p>✅ Correct: <b>${r.correct}</b></p>
+ <p>❌ Wrong: <b>${r.wrong}</b></p>
+ <p>⚪ Unanswered: <b>${r.unanswered}</b></p>
+ <p class="small">${r.autoSubmitted?"Time শেষ হওয়ায় automatically submitted হয়েছে।":"Successfully submitted হয়েছে।"}</p>
+ </div>`;
+}
+
+
+
+/* Exam anti-copy / anti-cheat protections */
+let securityViolations=0;
+let securityLocked=false;
+function securityWarning(reason){
+  if(submitted || securityLocked) return;
+  securityViolations++;
+  securityLog.push({type:reason, time:new Date().toISOString()});
+  alert(`⚠️ সতর্কতা!\n${reason}\n\nএটি Exam-এর ${securityViolations} নম্বর security warning।`);
+  if(securityViolations>=3){
+    securityLocked=true;
+    alert("পরপর 3 বার security violation হওয়ায় Exam auto-submit করা হচ্ছে।");
+    submitExam(true);
+  }
+}
+function examActive(){return !document.getElementById('examSection')?.classList.contains('hidden') && !submitted;}
+document.addEventListener('contextmenu',e=>{if(examActive())e.preventDefault();});
+document.addEventListener('copy',e=>{if(examActive())e.preventDefault();});
+document.addEventListener('cut',e=>{if(examActive())e.preventDefault();});
+document.addEventListener('paste',e=>{if(examActive())e.preventDefault();});
+document.addEventListener('selectstart',e=>{if(examActive())e.preventDefault();});
+document.addEventListener('keydown',e=>{
+  if(!examActive())return;
+  const k=e.key.toLowerCase();
+  if(k==='f12' || (e.ctrlKey&&e.shiftKey&&['i','j','c'].includes(k)) || (e.ctrlKey&&['u','s','p','c','x','v'].includes(k)) || (e.metaKey&&['u','s','p','c','x','v'].includes(k))){
+    e.preventDefault();
+    securityWarning('Copy, Print, Save, View Source বা Developer Tools shortcut ব্যবহার করা যাবে না।');
+  }
+});
+document.addEventListener('visibilitychange',()=>{if(examActive() && document.hidden)securityWarning('আপনি Exam screen থেকে অন্য app/tab-এ গেছেন।');});
+window.addEventListener('blur',()=>{if(examActive())securityWarning('Exam window থেকে focus সরে গেছে।');});
+window.addEventListener('beforeunload',e=>{if(examActive()){e.preventDefault();e.returnValue='Exam চলছে। Page বন্ধ বা refresh করবেন না।';}});
+// Browser Back protection while the exam is active.
+const __examHistoryPush=history.pushState.bind(history);
+function lockExamHistory(){try{__examHistoryPush({exam:true},'',location.href);__examHistoryPush({exam:true},'',location.href);}catch(e){}}
+window.addEventListener('popstate',()=>{if(examActive()){__examHistoryPush({exam:true},'',location.href);securityWarning('Browser Back button ব্যবহার করা যাবে না।');}});
+const __oldStart=window.startExam;
+let hardDeadline=0, hardTimer=null;
+const examTabId=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random());
+const examLockKey='computerApplicationExam_active_lock';
+const examChannel=('BroadcastChannel' in window)?new BroadcastChannel('computerApplicationExam'):null;
+
+function setExamWatermark(){
+  const w=document.getElementById('examWatermark');
+  if(!w)return;
+  const text=(`${studentName} • Set ${currentSet} • COMPUTER APPLICATION EXAM`).replace(/</g,'&lt;');
+  w.innerHTML=Array.from({length:7},()=>`<span>${text}</span>`).join('');
+}
+function acquireExamLock(){
+  try{
+    const old=JSON.parse(localStorage.getItem(examLockKey)||'null');
+    if(old && old.tabId!==examTabId && old.expires>Date.now()){
+      alert('এই exam অন্য একটি tab-এ already চলছে। একই সময়ে একাধিক tab ব্যবহার করা যাবে না।');
+      return false;
+    }
+    localStorage.setItem(examLockKey,JSON.stringify({tabId:examTabId,student:studentName,expires:Date.now()+3700000}));
+    examChannel?.postMessage({type:'exam-started',tabId:examTabId});
+    return true;
+  }catch(e){return true;}
+}
+function releaseExamLock(){
+  try{const x=JSON.parse(localStorage.getItem(examLockKey)||'null');if(x?.tabId===examTabId)localStorage.removeItem(examLockKey);}catch(e){}
+  examChannel?.postMessage({type:'exam-ended',tabId:examTabId});
+}
+if(examChannel){
+  examChannel.onmessage=(e)=>{
+    if(e.data?.type==='exam-started' && examActive() && e.data.tabId!==examTabId){
+      securityWarning('একই Exam অন্য একটি tab-এ খোলার চেষ্টা শনাক্ত হয়েছে।');
+    }
+  };
+}
+window.addEventListener('storage',e=>{
+  if(e.key===examLockKey && examActive() && e.newValue){
+    try{const x=JSON.parse(e.newValue);if(x.tabId!==examTabId)securityWarning('একই Exam অন্য একটি browser tab-এ চালু হয়েছে।');}catch(err){}
+  }
+});
+window.addEventListener('online',()=>{if(examActive())alert('Internet connection ফিরে এসেছে। Exam চালিয়ে যান।');});
+window.addEventListener('offline',()=>{if(examActive())securityWarning('Internet connection বিচ্ছিন্ন হয়েছে। Result save করার জন্য connection প্রয়োজন।');});
+
+const __oldSubmit=window.submitExam;
+window.submitExam=async function(autoSubmit){
+  if(examActive() && hardDeadline && Date.now()>=hardDeadline) autoSubmit=true;
+  return __oldSubmit(autoSubmit);
+};
+window.startExam=function(){
+  try{
+    const existing=JSON.parse(localStorage.getItem(examLockKey)||'null');
+    if(existing && existing.expires>Date.now() && existing.tabId!==examTabId){
+      alert('এই Exam অন্য একটি tab-এ চলছে। প্রথমে সেটি বন্ধ করুন।'); return;
+    }
+  }catch(e){}
+  __oldStart();
+  if(!examActive())return;
+  if(!acquireExamLock())return;
+  hardDeadline=Date.now()+3600000;
+  clearTimeout(hardTimer);
+  hardTimer=setTimeout(()=>{if(examActive())window.submitExam(true);},3600500);
+  setExamWatermark();
+  if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+  lockExamHistory();
+};
+window.addEventListener('pagehide',()=>{if(!examActive())releaseExamLock();});
+const antiPrintStyle=document.createElement('style');
+antiPrintStyle.textContent='@media print{body{display:none!important}}';
+document.head.appendChild(antiPrintStyle);
+const extraSecurityStyle=document.createElement('style');
+extraSecurityStyle.textContent=`
+.exam-watermark{position:fixed;inset:0;z-index:9998;pointer-events:none;overflow:hidden;opacity:.055;display:flex;flex-wrap:wrap;align-content:space-around;justify-content:space-around;transform:rotate(-18deg);font-size:16px;font-weight:900;color:#111827;}
+.exam-watermark span{display:block;width:45%;text-align:center;margin:30px 0;white-space:nowrap;}
+@media(max-width:600px){.exam-watermark{font-size:12px}.exam-watermark span{width:70%;margin:20px 0}}`;
+document.head.appendChild(extraSecurityStyle);
+
+document.getElementById("studentSection").classList.remove("hidden");
+</script>
+
+<script>
+(function(){
+  window.examActivityTimeline = window.examActivityTimeline || [];
+
+  window.logActivity = async function(type, details){
+    const event = {
+      type: type,
+      details: details || "",
+      at: new Date().toISOString(),
+      elapsedSeconds: (typeof timerSeconds === "number") ? Math.max(0, 3600 - timerSeconds) : null
+    };
+    window.examActivityTimeline.push(event);
+
+    // If Firebase/database objects already exist, save each event under the student's result/session.
+    try {
+      if (typeof db !== "undefined" && typeof ref === "function" && typeof push === "function") {
+        const name = (typeof studentName !== "undefined" && studentName) ? studentName : "unknown";
+        const setName = (typeof currentSet !== "undefined" && currentSet) ? currentSet : "unknown";
+        await push(ref(db, "computerApplicationExam/activityLogs"), {
+          name: name,
+          set: setName,
+          uid: (auth.currentUser ? auth.currentUser.uid : null),
+          ...event
+        });
+      }
+    } catch(e) {
+      // Activity logging must never interrupt the exam.
+    }
+  };
+
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden) logActivity("TAB_HIDDEN", "Exam page became hidden");
+    else logActivity("TAB_VISIBLE", "Exam page became visible");
+  });
+
+  window.addEventListener("blur", function(){
+    logActivity("WINDOW_BLUR", "Exam window lost focus");
+  });
+
+  window.addEventListener("focus", function(){
+    logActivity("WINDOW_FOCUS", "Exam window regained focus");
+  });
+
+  window.addEventListener("popstate", function(){
+    logActivity("BACK_ATTEMPT", "Browser back navigation attempted");
+  });
+
+  document.addEventListener("fullscreenchange", function(){
+    if (!document.fullscreenElement) logActivity("FULLSCREEN_EXIT", "Fullscreen was exited");
+    else logActivity("FULLSCREEN_ENTER", "Fullscreen entered");
+  });
+
+  document.addEventListener("keydown", function(e){
+    const key = (e.key || "").toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && ["c","v","x","p","s","u"].includes(key)) {
+      logActivity("SHORTCUT_ATTEMPT", "Blocked shortcut: " + key);
+    }
+    if (key === "f12") logActivity("DEVTOOLS_ATTEMPT", "F12 pressed");
+  });
+
+  document.addEventListener("copy", function(){ logActivity("COPY_ATTEMPT", "Copy attempted"); });
+  document.addEventListener("cut", function(){ logActivity("CUT_ATTEMPT", "Cut attempted"); });
+  document.addEventListener("paste", function(){ logActivity("PASTE_ATTEMPT", "Paste attempted"); });
+  document.addEventListener("contextmenu", function(){ logActivity("RIGHT_CLICK", "Context menu attempted"); });
+})();
+</script>
+
+
+<script>
+window.getActivityTimeline = function(){
+  return (window.examActivityTimeline || []).map((x,i)=>({
+    no: i + 1,
+    type: x.type,
+    details: x.details,
+    at: x.at,
+    elapsedSeconds: x.elapsedSeconds
+  }));
+};
+</script>
+
+
+<script>
+(function(){
+  window.liveMonitor = window.liveMonitor || {
+    violations: 0,
+    currentQuestion: 0,
+    answered: 0,
+    status: "Running",
+    lastActivity: null
+  };
+
+  function countAnswered(){
+    try {
+      return (typeof examQuestions !== "undefined" && Array.isArray(examQuestions))
+        ? examQuestions.reduce((n, q, i) =>
+            n + (document.querySelector(`input[name="q${i}"]:checked`) ? 1 : 0), 0)
+        : 0;
+    } catch(e){ return 0; }
+  }
+
+  function publishLive(reason){
+    try{
+      const answered = countAnswered();
+      const current = window.liveMonitor.currentQuestion || 1;
+      const payload = {
+        uid: (auth.currentUser ? auth.currentUser.uid : null),
+        name: (typeof studentName !== "undefined" && studentName) ? studentName : "unknown",
+        set: (typeof currentSet !== "undefined" && currentSet) ? currentSet : "unknown",
+        status: window.liveMonitor.status || "Running",
+        currentQuestion: current,
+        totalQuestions: 40,
+        answered: answered,
+        unanswered: 40 - answered,
+        timeLeftSeconds: (typeof timerSeconds === "number") ? timerSeconds : null,
+        violations: window.liveMonitor.violations || 0,
+        lastActivity: reason || window.liveMonitor.lastActivity || "heartbeat",
+        updatedAt: new Date().toISOString(),
+        online: navigator.onLine !== false
+      };
+
+      window.liveMonitor.answered = answered;
+      window.liveMonitor.lastActivity = payload.lastActivity;
+
+      const ids = ["liveCurrentQuestion","liveAnswered","liveRemaining","liveViolations","liveStatus"];
+      const vals = [current, answered, 40-answered, payload.violations, payload.status];
+      ids.forEach((id,i)=>{ const el=document.getElementById(id); if(el) el.textContent=vals[i]; });
+
+      if (typeof db !== "undefined" && typeof ref === "function" && typeof set === "function") {
+        const safeName = payload.name.replace(/[.#$[\]/]/g,"_");
+        const key = safeName + "_" + payload.set;
+        set(ref(db, "computerApplicationExam/liveSessions/" + key), payload).catch(()=>{});
+      }
+    }catch(e){}
+  }
+
+  window.updateLiveCurrentQuestion = function(n){
+    window.liveMonitor.currentQuestion = Number(n) || 1;
+    publishLive("Viewing Q" + window.liveMonitor.currentQuestion);
+  };
+
+  window.markLiveViolation = function(type){
+    window.liveMonitor.violations = (window.liveMonitor.violations || 0) + 1;
+    publishLive(type || "Security violation");
+  };
+
+  document.addEventListener("change", function(e){
+    if(e.target && e.target.matches('input[type="radio"][name^="q"]')){
+      const match = e.target.name.match(/^q(\d+)$/);
+      if(match){
+        window.updateLiveCurrentQuestion(Number(match[1]) + 1);
+        publishLive("Answer selected on Q" + (Number(match[1])+1));
+      }
+    }
+  });
+
+  window.addEventListener("online", function(){ publishLive("Internet connection restored"); });
+  window.addEventListener("offline", function(){ publishLive("Internet connection lost"); });
+
+  // Heartbeat for live dashboard.
+  setInterval(function(){ publishLive("Heartbeat"); }, 5000);
+
+  // If an existing submitExam is wrapped, publish final state without changing scoring.
+  function wrapSubmit(){
+    if(typeof window.submitExam !== "function" || window.submitExam.__liveWrapped) return false;
+    const original = window.submitExam;
+    window.submitExam = async function(autoSubmit){
+      window.liveMonitor.status = "Submitted";
+      publishLive(autoSubmit ? "Auto submitted" : "Submitted");
+      return original.apply(this, arguments);
+    };
+    window.submitExam.__liveWrapped = true;
+    return true;
+  }
+  const timer = setInterval(function(){
+    if(wrapSubmit()) clearInterval(timer);
+  }, 250);
+
+  // Attempt to show the monitor preview when the exam starts.
+  const showTimer = setInterval(function(){
+    const sec = document.getElementById("examSection");
+    const box = document.getElementById("liveMonitorPreview");
+    if(sec && box && !sec.classList.contains("hidden")){
+      box.style.display = "block";
+      publishLive("Exam started");
+      clearInterval(showTimer);
+    }
+  }, 500);
+})();
+</script>
+
+
+
+<button id="openLiveTeacherBtn" type="button" style="margin:8px 0">👨‍🏫 Live Monitoring</button>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var b=document.getElementById("openLiveTeacherBtn");
+  if(b && typeof window.openTeacherLiveDashboard==="function"){
+    b.addEventListener("click",window.openTeacherLiveDashboard);
+  }
+});
+</script>
+
+<section id="teacherLiveDashboard" style="display:none;max-width:1100px;margin:20px auto;padding:18px;font-family:Arial,sans-serif">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <h2 style="margin:0">👨‍🏫 Live Exam Monitoring</h2>
+    <button id="refreshLiveDashboard" type="button">Refresh</button>
+  </div>
+  <div id="liveOverview" style="margin:14px 0;padding:12px;border-radius:12px;background:#f4f4f4">Loading…</div>
+  <div style="overflow:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;padding:8px;border-bottom:1px solid #ccc">Student</th>
+        <th style="padding:8px;border-bottom:1px solid #ccc">Set</th>
+        <th style="padding:8px;border-bottom:1px solid #ccc">Status</th>
+        <th style="padding:8px;border-bottom:1px solid #ccc">Question</th>
+        <th style="padding:8px;border-bottom:1px solid #ccc">Progress</th>
+        <th style="padding:8px;border-bottom:1px solid #ccc">Time</th>
+        <th style="padding:8px;border-bottom:1px solid #ccc">Violations</th>
+        <th style="padding:8px;border-bottom:1px solid #ccc">Last Activity</th>
+      </tr></thead>
+      <tbody id="liveStudentsBody"></tbody>
+    </table>
+  </div>
+  <div id="studentDetailPanel" style="margin-top:18px"></div>
+</section>
+<script>
+(function(){
+  function fmt(sec){
+    if(sec == null || sec < 0) return "—";
+    const m=Math.floor(sec/60), s=sec%60;
+    return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
+
+  window.initTeacherLiveDashboard = function(){
+    if(typeof db === "undefined" || typeof ref !== "function" || typeof onValue !== "function") return;
+
+    const root = ref(db, "computerApplicationExam/liveSessions");
+    onValue(root, snap=>{
+      const data=snap.val() || {};
+      const rows=Object.values(data);
+      const body=document.getElementById("liveStudentsBody");
+      const overview=document.getElementById("liveOverview");
+      if(!body) return;
+
+      const running=rows.filter(x=>x.status==="Running").length;
+      const offline=rows.filter(x=>x.online===false).length;
+      const violations=rows.reduce((n,x)=>n+(Number(x.violations)||0),0);
+
+      overview.textContent =
+        "Students: "+rows.length+"  |  Running: "+running+
+        "  |  Offline: "+offline+"  |  Total violations: "+violations;
+
+      body.innerHTML="";
+      rows.sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(x=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML =
+          "<td style='padding:8px;border-bottom:1px solid #eee'>"+escapeHtml(x.name)+"</td>"+
+          "<td style='text-align:center;padding:8px;border-bottom:1px solid #eee'>"+escapeHtml(x.set)+"</td>"+
+          "<td style='text-align:center;padding:8px;border-bottom:1px solid #eee'>"+(x.online===false?"🔴 Offline":"🟢 "+escapeHtml(x.status||"Running"))+"</td>"+
+          "<td style='text-align:center;padding:8px;border-bottom:1px solid #eee'>Q"+(x.currentQuestion||"—")+"/40</td>"+
+          "<td style='text-align:center;padding:8px;border-bottom:1px solid #eee'>"+(x.answered||0)+"/40</td>"+
+          "<td style='text-align:center;padding:8px;border-bottom:1px solid #eee'>"+fmt(Number(x.timeLeftSeconds))+"</td>"+
+          "<td style='text-align:center;padding:8px;border-bottom:1px solid #eee'>"+(x.violations||0)+"</td>"+
+          "<td style='padding:8px;border-bottom:1px solid #eee'>"+escapeHtml(x.lastActivity||"—")+"</td>";
+        body.appendChild(tr);
+      });
+    });
+  };
+
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  function init(){
+    var panel=document.getElementById("teacherLiveDashboard");
+    if(!panel) return;
+    // Teacher dashboard can be opened by calling window.openTeacherLiveDashboard().
+    window.openTeacherLiveDashboard=function(){
+      panel.style.display="block";
+      if(typeof window.initTeacherLiveDashboard==="function"){
+        window.initTeacherLiveDashboard();
+      }
+      panel.scrollIntoView({behavior:"smooth",block:"start"});
+    };
+    window.closeTeacherLiveDashboard=function(){
+      panel.style.display="none";
+    };
+    var btn=document.getElementById("refreshLiveDashboard");
+    if(btn) btn.addEventListener("click",function(){
+      if(typeof window.initTeacherLiveDashboard==="function") window.initTeacherLiveDashboard();
+    });
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init);
+  else init();
+})();
+</script>
+
+
+<script>
+(function(){
+  const LIVE_STALE_MS=15000;
+  function staleCheck(){
+    document.querySelectorAll("#liveStudentsBody tr").forEach(function(tr){
+      // Dashboard rows already contain live status; visual stale detection is intentionally conservative.
+      tr.title="Live data refreshes automatically from Firebase.";
+    });
+  }
+  setInterval(staleCheck,5000);
+})();
+</script>
+
+
+<script>
+(function(){
+  const LIVE_ROOT = "computerApplicationExam/liveSessions";
+  const SESSION_KEY = "currentExamLiveSessionId";
+
+  function getSessionId(){
+    let id = sessionStorage.getItem(SESSION_KEY);
+    if(!id){
+      id = "s_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,10);
+      sessionStorage.setItem(SESSION_KEY,id);
+    }
+    return id;
+  }
+
+  window.startReliableLiveSession = function(){
+    try{
+      if(typeof db==="undefined" || typeof ref!=="function" || typeof set!=="function") return;
+      const sid=getSessionId();
+      const name=(typeof studentName!=="undefined" && studentName)?studentName:"unknown";
+      const setName=(typeof currentSet!=="undefined" && currentSet)?currentSet:"unknown";
+      const sessionRef=ref(db, LIVE_ROOT+"/"+sid);
+
+      if(typeof onDisconnect==="function"){
+        onDisconnect(sessionRef).update({
+          online:false,
+          status:"Offline",
+          updatedAt:new Date().toISOString()
+        }).catch(()=>{});
+      }
+
+      function sync(reason){
+        const answered=(typeof countAnswered==="function")?countAnswered():0;
+        const payload={
+          sessionId:sid,
+          uid:(auth.currentUser ? auth.currentUser.uid : null),
+          name:name,
+          set:setName,
+          status:(window.liveMonitor&&window.liveMonitor.status)||"Running",
+          currentQuestion:(window.liveMonitor&&window.liveMonitor.currentQuestion)||1,
+          totalQuestions:40,
+          answered:answered,
+          unanswered:40-answered,
+          timeLeftSeconds:(typeof timerSeconds==="number")?timerSeconds:null,
+          violations:(window.liveMonitor&&window.liveMonitor.violations)||0,
+          lastActivity:reason||"Heartbeat",
+          updatedAt:new Date().toISOString(),
+          online:navigator.onLine!==false
+        };
+        set(sessionRef,payload).catch(()=>{});
+      }
+
+      window.__reliableLiveSync=sync;
+      sync("Exam started");
+      setInterval(()=>sync("Heartbeat"),5000);
+      window.addEventListener("online",()=>sync("Internet connection restored"));
+      window.addEventListener("offline",()=>sync("Internet connection lost"));
+    }catch(e){}
+  };
+
+  // Start once the exam UI becomes visible and studentName/currentSet are initialized.
+  const t=setInterval(function(){
+    if(document.getElementById("examSection") &&
+       !document.getElementById("examSection").classList.contains("hidden") &&
+       typeof studentName!=="undefined" && studentName){
+      if(typeof window.startReliableLiveSession==="function") window.startReliableLiveSession();
+      clearInterval(t);
+    }
+  },500);
+})();
+</script>
+
+
+<script>
+(function(){
+  function qFromTarget(el){
+    if(!el) return;
+    var b=el.closest && el.closest("#questionPalette button");
+    if(!b) return;
+    var n=parseInt((b.textContent||"").trim(),10);
+    if(Number.isFinite(n) && window.updateLiveCurrentQuestion) {
+      window.updateLiveCurrentQuestion(n);
+      if(window.__reliableLiveSync) window.__reliableLiveSync("Viewing Q"+n);
+    }
+  }
+  document.addEventListener("click",function(e){qFromTarget(e.target);},true);
+
+  // Keep live data accurate when the selected answer changes.
+  document.addEventListener("change",function(e){
+    if(e.target && e.target.matches && e.target.matches('input[type="radio"][name^="q"]')){
+      var m=e.target.name.match(/^q(\d+)$/);
+      if(m){
+        var n=Number(m[1])+1;
+        if(window.updateLiveCurrentQuestion) window.updateLiveCurrentQuestion(n);
+        if(window.__reliableLiveSync) window.__reliableLiveSync("Q"+n+" answer selected");
+      }
+    }
+  },true);
+})();
+</script>
+
+</body>
+</html>
