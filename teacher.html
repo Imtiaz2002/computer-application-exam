@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teacher Live Monitoring</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#eef2ff,#f8fafc);color:#172033}
+.wrap{max-width:1200px;margin:auto;padding:20px}
+.card{background:#fff;border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 8px 25px #00000012}
+input,button,select{padding:11px 13px;border-radius:10px;border:1px solid #ccd2df;font-size:15px}
+button{cursor:pointer;border:0;background:#2638d9;color:#fff;font-weight:700}
+button.secondary{background:#555}
+.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.stat{padding:14px;border-radius:14px;background:#f5f7fb}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{padding:10px;border-bottom:1px solid #e8eaf0;text-align:left}
+th{background:#f5f6fa;position:sticky;top:0}
+.live{font-weight:700}
+.small{font-size:13px;color:#687080}
+.scroll{overflow:auto}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef1ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="login" class="card">
+    <h2>👨‍🏫 Teacher Live Monitoring</h2>
+    <p>Teacher login (Student-দের password লাগবে না)।</p>
+    <input id="email" type="email" placeholder="Teacher email">
+    <input id="password" type="password" placeholder="Teacher password">
+    <button onclick="login()">Open Dashboard</button>
+    <div id="loginMsg" class="small"></div>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <div><h2 style="margin:0">🟢 Live Exam Monitoring</h2><div class="small">Updates automatically from Firebase</div></div>
+        <div style="display:flex;gap:8px"><button class="secondary" onclick="location.reload()">Refresh</button><button class="secondary" onclick="firebase.auth().signOut().then(()=>location.reload())">Logout</button></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="stat">Students <h2 id="students">0</h2></div>
+      <div class="stat">Running <h2 id="running">0</h2></div>
+      <div class="stat">Offline <h2 id="offline">0</h2></div>
+      <div class="stat">Violations <h2 id="violations">0</h2></div>
+    </div>
+
+    <div class="card">
+      <h3>📡 Live Students</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr>
+            <th>Student</th><th>Set</th><th>Status</th><th>Current Q</th>
+            <th>Progress</th><th>Time Left</th><th>Violations</th><th>Last Activity</th><th>Updated</th>
+          </tr></thead>
+          <tbody id="studentsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📝 Activity Timeline</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Time</th><th>Student</th><th>Type</th><th>Details</th><th>Set</th></tr></thead>
+          <tbody id="activityBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="resultDetail" class="card hidden"></div>
+
+    <div class="card">
+      <h3>📊 Submitted Results</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Student</th><th>Set</th><th>Score</th><th>Correct</th><th>Wrong</th><th>Unanswered</th><th>Submitted</th><th>Details</th></tr></thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script>
+const firebaseConfig={
+ apiKey:"AIzaSyBtlw1TCcjUah1JAlrVc7XaH53p8DT4PR8",
+ authDomain:"exam-8fde7.firebaseapp.com",
+ projectId:"exam-8fde7",
+ storageBucket:"exam-8fde7.firebasestorage.app",
+ messagingSenderId:"703193735071",
+ appId:"1:703193735071:web:abb365641075143fb3a7aa",
+ measurementId:"G-E1HVQRWQRE",
+ databaseURL:"https://exam-8fde7-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+const TEACHER_EMAIL="teacher@brainbyte.com";
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+function time(sec){if(sec==null)return"—";sec=Math.max(0,Number(sec));return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0");}
+async function login(){
+ const email=document.getElementById("email").value.trim().toLowerCase();
+ const password=document.getElementById("password").value;
+ const msg=document.getElementById("loginMsg");
+ if(email!==TEACHER_EMAIL){ msg.textContent="Unauthorized teacher email."; return; }
+ if(!password){ msg.textContent="Password দিন।"; return; }
+ msg.textContent="Signing in…";
+ try{
+   const cred=await firebase.auth().signInWithEmailAndPassword(email,password);
+   if(cred.user.email.toLowerCase()!==TEACHER_EMAIL){ await firebase.auth().signOut(); throw new Error("Unauthorized teacher account."); }
+   document.getElementById("login").classList.add("hidden");
+   document.getElementById("dashboard").classList.remove("hidden");
+   start();
+ }catch(e){ msg.textContent="Login failed: "+(e.message||e); }
+}
+
+function viewResult(r){
+  const box=document.getElementById("resultDetail");
+  if(!box)return;
+  const answers=Array.isArray(r.answers)?r.answers:[];
+  let html=`<h3>📝 ${esc(r.name)} — Set ${esc(r.set||"-")}</h3>
+    <p><b>Score:</b> ${Number(r.score)||0}/40 &nbsp; | &nbsp;
+    <b>Correct:</b> ${Number(r.correct)||0} &nbsp; | &nbsp;
+    <b>Wrong:</b> ${Number(r.wrong)||0} &nbsp; | &nbsp;
+    <b>Blank:</b> ${Number(r.unanswered)||0}</p>
+    <p class="small">Security violations: ${Number(r.securityViolations)||0}
+    &nbsp; | &nbsp; Answer changes: ${Number(r.answerChanges)||0}
+    &nbsp; | &nbsp; ${r.autoSubmitted?"Auto-submitted":"Manually submitted"}</p>`;
+
+  if(!answers.length){
+    html += `<p>No per-question answer data found in this result.</p>`;
+  }else{
+    html += answers.map(a=>{
+      const selected=a.selected===null ? "Not answered" : `${esc(a.selected)} - ${esc(a.selectedText||"")}`;
+      const correct=`${esc(a.correct)} - ${esc(a.correctText||"")}`;
+      const ok=a.selected!==null && a.selected===a.correct;
+      return `<div style="padding:12px;margin:8px 0;border-radius:10px;background:#f8fafc;border:1px solid #e5e7eb">
+        <b>Q${Number(a.questionNo)||0}</b> (Original Q${Number(a.originalQuestionNo)||Number(a.questionNo)||0})<br>
+        <span style="color:${ok?"#15803d":"#dc2626"};font-weight:700">Selected: ${selected}</span><br>
+        <span style="color:#15803d;font-weight:700">Correct: ${correct}</span>
+      </div>`;
+    }).join("");
+  }
+  html += `<button class="secondary" onclick="document.getElementById('resultDetail').classList.add('hidden')">Close</button>`;
+  box.innerHTML=html;
+  box.classList.remove("hidden");
+  box.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function start(){
+ db.ref("computerApplicationExam/liveSessions").on("value",snap=>{
+   const rows=Object.values(snap.val()||{}).filter(x=>x && (x.online!==false || (Date.now()-new Date(x.updatedAt||0).getTime())<15000));
+   document.getElementById("students").textContent=rows.length;
+   document.getElementById("running").textContent=rows.filter(x=>x.status==="Running").length;
+   document.getElementById("offline").textContent=rows.filter(x=>x.online===false).length;
+   document.getElementById("violations").textContent=rows.reduce((n,x)=>n+(Number(x.violations)||0),0);
+   document.getElementById("studentsBody").innerHTML=rows.sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(x=>
+    `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.set)}</td>
+    <td class="live">${x.online===false?"🔴 Offline":"🟢 "+esc(x.status||"Running")}</td>
+    <td>Q${x.currentQuestion||"—"}/40</td><td>${x.answered||0}/40</td><td>${time(x.timeLeftSeconds)}</td>
+    <td>${x.violations||0}</td><td>${esc(x.lastActivity||"—")}</td>
+    <td>${esc(x.updatedAt?new Date(x.updatedAt).toLocaleTimeString():"—")}</td></tr>`).join("");
+ });
+ db.ref("computerApplicationExam/activityLogs").limitToLast(200).on("value",snap=>{
+   const rows=Object.values(snap.val()||{}).sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+   document.getElementById("activityBody").innerHTML=rows.map(x=>
+    `<tr><td>${esc(x.at?new Date(x.at).toLocaleTimeString():"—")}</td><td>${esc(x.name)}</td>
+    <td><span class="badge">${esc(x.type)}</span></td><td>${esc(x.details)}</td><td>${esc(x.set)}</td></tr>`).join("");
+ });
+ db.ref("computerApplicationExam/results").limitToLast(200).on("value",snap=>{
+   const rows=Object.values(snap.val()||{}).sort((a,b)=>String(b.submittedAt).localeCompare(String(a.submittedAt)));
+   document.getElementById("resultsBody").innerHTML=rows.map((x,i)=>
+    `<tr><td>${esc(x.name)}</td><td>${esc(x.set)}</td><td><b>${Number(x.score)||0}/40</b></td>
+    <td>${Number(x.correct)||0}</td><td>${Number(x.wrong)||0}</td><td>${Number(x.unanswered)||0}</td>
+    <td>${esc(x.submittedAt?new Date(x.submittedAt).toLocaleString():"—")}</td>
+    <td><button onclick="viewResult(${JSON.stringify(x)})">View Answers</button></td></tr>`).join("");
+ });
+}
+</script>
+
+<script>
+(function(){
+  function addLiveLabel(){
+    var d=document.getElementById("dashboard");
+    if(!d || document.getElementById("liveConnectionLabel")) return;
+    var p=document.createElement("div");
+    p.id="liveConnectionLabel";
+    p.className="small";
+    p.style="margin:8px 0;font-weight:700";
+    p.textContent="🟢 Firebase live monitoring active";
+    d.insertBefore(p,d.firstChild);
+  }
+  document.addEventListener("DOMContentLoaded",addLiveLabel);
+})();
+</script>
+
+</body>
+</html>
