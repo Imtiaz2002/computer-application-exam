@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teacher Live Monitoring</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Bengali",sans-serif;background:linear-gradient(135deg,#eef2ff,#f8fafc);color:#172033}.wrap{max-width:1200px;margin:auto;padding:16px}.card{background:#fff;border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 8px 25px #00000012}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{padding:14px;border-radius:14px;background:#f5f7fb;border:1px solid #e5e7eb}.stat h2{margin:5px 0 0}.small{font-size:13px;color:#687080}input,button{padding:11px 13px;border-radius:10px;border:1px solid #ccd2df;font-size:15px}input{width:100%;margin:6px 0}button{cursor:pointer;border:0;background:#2638d9;color:#fff;font-weight:700}.secondary{background:#555}.hidden{display:none!important}.status{font-weight:800}.liveCard{background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin:10px 0}.liveCard .row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid #e5e7eb}.liveCard .row:last-child{border-bottom:0}.label{font-weight:700;color:#4b5563}.answer{padding:11px;border:1px solid #e5e7eb;border-radius:12px;margin:8px 0;background:#f8fafc}.answer.correct{border-left:5px solid #16a34a}.answer.wrong{border-left:5px solid #dc2626}.resultHead{background:#eef2ff;border-radius:14px;padding:14px;margin-bottom:12px}.empty{padding:20px;text-align:center;color:#6b7280}.resultActions{display:flex;gap:8px;flex-wrap:wrap}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef1ff}.desktopTable{width:100%;border-collapse:collapse}.desktopTable th,.desktopTable td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left}.desktopTable th{background:#f5f6fa}.mobileOnly{display:none}
+@media(max-width:700px){.wrap{padding:10px}.grid{grid-template-columns:repeat(2,1fr)}.mobileOnly{display:block}.desktopOnly{display:none}.card{padding:14px;margin:10px 0;border-radius:14px}.top h2{font-size:20px}.resultActions button{flex:1}.liveCard{padding:12px}.liveCard .row{font-size:14px}.answer{font-size:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section id="login" class="card">
+  <h2>👨‍🏫 Teacher Live Monitoring</h2>
+  <p class="small">Only the authorized teacher account can open this dashboard.</p>
+  <input id="email" type="email" autocomplete="username" placeholder="Teacher email">
+  <input id="password" type="password" autocomplete="current-password" placeholder="Teacher password">
+  <button id="loginBtn" type="button">Open Dashboard</button>
+  <div id="loginMsg" class="small"></div>
+</section>
+
+<section id="dashboard" class="hidden">
+  <div class="card top"><div><h2 style="margin:0">🟢 Live Exam Monitoring</h2><div class="small">Real-time Firebase updates</div></div><div class="resultActions"><button class="secondary" id="refreshBtn">Refresh</button><button class="secondary" id="logoutBtn">Logout</button></div></div>
+  <div id="connection" class="small" style="font-weight:700;margin:8px 2px"></div>
+  <div class="grid">
+    <div class="stat">Students<h2 id="students">0</h2></div><div class="stat">Running<h2 id="running">0</h2></div><div class="stat">Offline<h2 id="offline">0</h2></div><div class="stat">Violations<h2 id="violations">0</h2></div>
+  </div>
+
+  <div class="card"><h3>📡 Live Students</h3><div id="liveStudents"></div><div id="liveEmpty" class="empty">No student is currently running the exam.</div></div>
+  <div class="card"><h3>📝 Activity Timeline</h3><div id="activityList"></div><div id="activityEmpty" class="empty">No activity recorded yet.</div></div>
+  <div id="resultDetail" class="card hidden"></div>
+  <div class="card"><h3>📊 Submitted Results</h3><div id="resultsList"></div><div id="resultsEmpty" class="empty">No submitted results yet.</div></div>
+</section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyBtlw1TCcjUah1JAlrVc7XaH53p8DT4PR8",authDomain:"exam-8fde7.firebaseapp.com",projectId:"exam-8fde7",storageBucket:"exam-8fde7.firebasestorage.app",messagingSenderId:"703193735071",appId:"1:703193735071:web:abb365641075143fb3a7aa",measurementId:"G-E1HVQRWQRE",databaseURL:"https://exam-8fde7-default-rtdb.firebaseio.com"};
+firebase.initializeApp(firebaseConfig);const db=firebase.database();const auth=firebase.auth();const TEACHER_EMAIL="teacher@brainbyte.com";let liveUnsub=[],liveRows=[],resultRows=[];
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':'&quot;',"'":'&#039;'}[m]));
+const fmtTime=s=>s==null?"—":String(Math.max(0,Number(s))).padStart(2,'0');
+function clearListeners(){liveUnsub.forEach(u=>{try{u()}catch(e){}});liveUnsub=[];}
+function showDashboard(){document.getElementById('login').classList.add('hidden');document.getElementById('dashboard').classList.remove('hidden');document.getElementById('connection').textContent='🟢 Connected to Firebase';startListeners();}
+async function login(){const email=document.getElementById('email').value.trim().toLowerCase(),pw=document.getElementById('password').value,msg=document.getElementById('loginMsg');if(email!==TEACHER_EMAIL){msg.textContent='Unauthorized teacher email.';return}if(!pw){msg.textContent='Password দিন।';return}msg.textContent='Signing in…';try{const c=await auth.signInWithEmailAndPassword(email,pw);if((c.user.email||'').toLowerCase()!==TEACHER_EMAIL){await auth.signOut();throw Error('Unauthorized teacher account.')}showDashboard()}catch(e){msg.textContent='Login failed: '+(e.message||e)}}
+document.getElementById('loginBtn').onclick=login;document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+document.getElementById('logoutBtn').onclick=()=>auth.signOut().then(()=>location.reload());document.getElementById('refreshBtn').onclick=()=>{clearListeners();startListeners()};
+function startListeners(){clearListeners();
+ const liveRef=db.ref('computerApplicationExam/liveSessions');const liveCb=snap=>{const raw=snap.val()||{};const now=Date.now();liveRows=Object.values(raw).filter(x=>x&&x.updatedAt&&((now-new Date(x.updatedAt).getTime())<20000||x.online===true));renderLive();};liveRef.on('value',liveCb);liveUnsub.push(()=>liveRef.off('value',liveCb));
+ const actRef=db.ref('computerApplicationExam/activityLogs').limitToLast(100);const actCb=snap=>renderActivity(Object.values(snap.val()||{}).sort((a,b)=>String(b.at).localeCompare(String(a.at))));actRef.on('value',actCb);liveUnsub.push(()=>actRef.off('value',actCb));
+ const resRef=db.ref('computerApplicationExam/results').limitToLast(200);const resCb=snap=>{resultRows=Object.values(snap.val()||{}).sort((a,b)=>String(b.submittedAt).localeCompare(String(a.submittedAt)));renderResults()};resRef.on('value',resCb);liveUnsub.push(()=>resRef.off('value',resCb));
+}
+function renderLive(){const box=document.getElementById('liveStudents'),empty=document.getElementById('liveEmpty');const rows=liveRows.sort((a,b)=>String(a.name).localeCompare(String(b.name)));document.getElementById('students').textContent=rows.length;document.getElementById('running').textContent=rows.filter(x=>x.online!==false&&x.status==='Running').length;document.getElementById('offline').textContent=rows.filter(x=>x.online===false||x.status==='Offline').length;document.getElementById('violations').textContent=rows.reduce((n,x)=>n+(Number(x.violations)||0),0);empty.style.display=rows.length?'none':'block';box.innerHTML=rows.map(x=>`<div class="liveCard"><div style="font-size:18px;font-weight:800;margin-bottom:7px">👤 ${esc(x.name)} <span class="badge">Set ${esc(x.set||'-')}</span></div><div class="row"><span class="label">Status</span><span class="status">${x.online===false||x.status==='Offline'?'🔴 Offline':'🟢 '+esc(x.status||'Running')}</span></div><div class="row"><span class="label">Current Question</span><span>Q${Number(x.currentQuestion)||1} / 40</span></div><div class="row"><span class="label">Progress</span><span>${Number(x.answered)||0} answered / ${Number(x.unanswered)||0} blank</span></div><div class="row"><span class="label">Time Left</span><span>${Math.floor((Number(x.timeLeftSeconds)||0)/60).toString().padStart(2,'0')}:${((Number(x.timeLeftSeconds)||0)%60).toString().padStart(2,'0')}</span></div><div class="row"><span class="label">Violations</span><span>${Number(x.violations)||0}</span></div><div class="row"><span class="label">Last Activity</span><span>${esc(x.lastActivity||'—')}</span></div><div class="row"><span class="label">Updated</span><span>${x.updatedAt?esc(new Date(x.updatedAt).toLocaleTimeString()):'—'}</span></div></div>`).join('');}
+function renderActivity(rows){const box=document.getElementById('activityList'),empty=document.getElementById('activityEmpty');empty.style.display=rows.length?'none':'block';box.innerHTML=rows.slice(0,50).map(x=>`<div class="liveCard"><div class="row"><span class="label">Time</span><span>${x.at?esc(new Date(x.at).toLocaleTimeString()):'—'}</span></div><div class="row"><span class="label">Student</span><span>${esc(x.name)}</span></div><div class="row"><span class="label">Type</span><span class="badge">${esc(x.type)}</span></div><div class="row"><span class="label">Details</span><span>${esc(x.details)}</span></div></div>`).join('');}
+function renderResults(){const box=document.getElementById('resultsList'),empty=document.getElementById('resultsEmpty');empty.style.display=resultRows.length?'none':'block';box.innerHTML=resultRows.map((x,i)=>`<div class="liveCard"><div style="font-size:18px;font-weight:800">👤 ${esc(x.name)} <span class="badge">Set ${esc(x.set||'-')}</span></div><div class="row"><span class="label">Score</span><span><b>${Number(x.score)||0}/40</b></span></div><div class="row"><span class="label">Correct</span><span>${Number(x.correct)||0}</span></div><div class="row"><span class="label">Wrong</span><span>${Number(x.wrong)||0}</span></div><div class="row"><span class="label">Unanswered</span><span>${Number(x.unanswered)||0}</span></div><div class="row"><span class="label">Submitted</span><span>${x.submittedAt?esc(new Date(x.submittedAt).toLocaleString()):'—'}</span></div><button type="button" onclick="viewResult(${i})" style="width:100%;margin-top:10px">👁️ View Answers</button></div>`).join('');}
+window.viewResult=function(i){const r=resultRows[Number(i)];const box=document.getElementById('resultDetail');if(!r||!box)return;const answers=Array.isArray(r.answers)?r.answers:[];let h=`<div class="resultHead"><h3 style="margin:0 0 8px">📝 ${esc(r.name)} — Set ${esc(r.set||'-')}</h3><b>Score ${Number(r.score)||0}/40</b> · Correct ${Number(r.correct)||0} · Wrong ${Number(r.wrong)||0} · Blank ${Number(r.unanswered)||0}<div class="small" style="margin-top:7px">Security violations: ${Number(r.securityViolations)||0} · Answer changes: ${Number(r.answerChanges)||0}</div></div>`;if(!answers.length)h+='<div class="empty">এই result-এ per-question answer data নেই। নতুন exam submit করলে answer sheet পাওয়া যাবে।</div>';else h+=answers.map(a=>{const ok=a.selected!==null&&String(a.selected)===String(a.correct);return `<div class="answer ${ok?'correct':'wrong'}"><b>Q${Number(a.questionNo)||0}</b> · Original Q${Number(a.originalQuestionNo)||Number(a.questionNo)||0}<br><span>${ok?'✅':'❌'} Selected: <b>${a.selected===null?'Not answered':esc(a.selected)+' — '+esc(a.selectedText||'')}</b></span><br><span>Correct: <b>${esc(a.correct||'')} — ${esc(a.correctText||'')}</b></span></div>`}).join('');h+=`<button type="button" class="secondary" onclick="document.getElementById('resultDetail').classList.add('hidden')">Close</button>`;box.innerHTML=h;box.classList.remove('hidden');box.scrollIntoView({behavior:'smooth',block:'start'});};
+auth.onAuthStateChanged(u=>{if(u&&(u.email||'').toLowerCase()===TEACHER_EMAIL)showDashboard();});
+</script>
+</body>
+</html>
